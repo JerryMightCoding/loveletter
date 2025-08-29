@@ -187,6 +187,7 @@ button:disabled:hover, .btn:disabled:hover, .modal-button:disabled:hover {
     overflow: visible; /* 允许内容溢出显示 */
 }
 
+/* 卡牌文字内容 */
 .card-content {
     font-size: 14px;
     font-weight: bold;
@@ -194,6 +195,10 @@ button:disabled:hover, .btn:disabled:hover, .modal-button:disabled:hover {
     line-height: 1.2;
     z-index: 10000;
     position: relative;
+    user-select: none; /* 防止卡面文字被选中 */
+    -webkit-user-select: none; /* Safari浏览器兼容 */
+    -moz-user-select: none; /* Firefox浏览器兼容 */
+    -ms-user-select: none; /* IE/Edge浏览器兼容 */
 }
 
 /* 卡牌描述 - 完全独立于牌面外部下方 */
