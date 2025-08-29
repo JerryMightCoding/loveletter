@@ -1,0 +1,615 @@
+.game-container { max-width: 800px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; } header { text-align: center; margin-bottom: 20px; } #game-status { color: #666; font-style: italic; } .player-info { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 8px; } .game-board { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; margin-bottom: 20px; } .deck-area { background-color: #e0e0e0; padding: 15px; border-radius: 8px; text-align: center; position: relative; } .player-hand { background-color: #e0e0e0; padding: 15px; border-radius: 8px; text-align: center; } #hand-container { display: flex; justify-content: center; gap: 10px; margin-top: 10px; } .card { width: 80px; height: 120px; background-color: #fff; border: 2px solid #333; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; } .card.selected { border-color: #ff0000; } .action-area { display: flex; flex-direction: column; gap: 10px; } /* 统一按钮样式系统 - 排除modal-option */
+button, .btn, .modal-button, .game-button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    text-align: center;
+    min-width: 80px;
+}
+
+/* 可用按钮 - 绿色 */
+button:not(:disabled), .btn:not(:disabled) {
+    background-color: #4CAF50;
+    color: white;
+    border: 2px solid transparent;
+}
+
+button:not(:disabled):hover, .btn:not(:disabled):hover {
+    background-color: #45a049;
+    color: white;
+}
+
+/* 不可用按钮 - 置灰 */
+button:disabled, .btn:disabled, .modal-button:disabled {
+    background-color: #cccccc;
+    color: #888888;
+    cursor: not-allowed;
+    border: 2px solid transparent;
+}
+
+button:disabled:hover, .btn:disabled:hover, .modal-button:disabled:hover {
+    background-color: #cccccc;
+    color: #888888;
+    cursor: not-allowed;
+}
+
+/* 选项按钮 - 独立样式，不受统一按钮系统影响 */
+.modal-option {
+    background-color: #fafafa !important;
+    color: #cccccc !important;
+    border: 1px solid #e0e0e0;
+    text-align: left;
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: normal;
+}
+
+.modal-option:hover {
+    background-color: #f5f5f5 !important;
+    color: #999999 !important;
+    border-color: #cccccc;
+}
+
+/* 选中状态 - 绿色高亮 */
+.modal-option.selected {
+    background-color: #4CAF50 !important;
+    color: white !important;
+    border: 2px solid #2E7D32;
+    font-weight: bold;
+}
+
+/* 游戏区域按钮 */
+.action-area button {
+    background-color: #4CAF50;
+    color: white;
+    border: 2px solid transparent;
+    margin: 5px 0;
+}
+
+.action-area button:disabled {
+    background-color: #cccccc;
+    color: #888888;
+    cursor: not-allowed;
+}
+
+.action-area button:not(:disabled):hover {
+    background-color: #45a049;
+    color: white;
+}
+
+.game-log { 
+    background-color: #f0f0f0; 
+    padding: 15px; 
+    border-radius: 8px; 
+    max-height: 200px; 
+    overflow-y: auto; 
+}
+
+#log-messages { 
+    list-style-type: none; 
+    padding: 0; 
+}
+
+#log-messages li { 
+    margin-bottom: 5px; 
+    padding: 5px; 
+    background-color: #fff; 
+    border-radius: 4px; 
+}
+
+.setup-screen {
+    text-align: center;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    max-width: 500px;
+    margin: 50px auto;
+}
+
+.setup-option {
+    margin: 20px 0;
+}
+
+.setup-option label {
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.setup-info {
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #e8f5e8;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 16px;
+    color: #333;
+}
+
+#player-count {
+    padding: 8px;
+    font-size: 16px;
+    width: 60px;
+    text-align: center;
+}
+
+#start-game {
+    padding: 10px 20px;
+    font-size: 18px;
+}
+
+/* 游戏界面显示控制 */
+.game-screen {
+    display: block;
+}
+
+.game-screen.hidden {
+    display: none;
+}
+
+/* 卡牌容器样式 - 包含卡牌和描述 */
+.card-wrapper {
+    position: relative;
+    margin: 0 15px 80px 15px; /* 增加底部边距确保描述文字有足够空间 */
+    display: inline-block;
+    z-index: 1000; /* 确保包装器在最顶层 */
+    overflow: visible; /* 允许内容溢出显示 */
+}
+
+/* 卡牌样式 - 保持纵向扑克牌比例 (标准比例约为2:3) */
+.card {
+    position: relative;
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 15px 8px;
+    width: 70px;
+    height: 105px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 9999; /* 确保卡牌在变暗层之上 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: visible; /* 允许内容溢出显示 */
+}
+
+.card-content {
+    font-size: 14px;
+    font-weight: bold;
+    color: #2c3e50;
+    line-height: 1.2;
+    z-index: 10000;
+    position: relative;
+}
+
+/* 卡牌描述 - 完全独立于牌面外部下方 */
+.card-description {
+    position: absolute;
+    top: 120px; /* 固定位置确保在牌面外部 */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: #333;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    line-height: 1.3;
+    text-align: center;
+    width: 180px;
+    z-index: 10000; /* 确保描述在最顶层 */
+    background-color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    white-space: normal;
+    border: 1px solid #e0e0e0;
+    position: absolute;
+}
+
+/* 卡牌悬浮效果 */
+.card:hover {
+    transform: scale(1.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1002; /* 悬浮时提升z-index */
+}
+
+/* 悬浮时显示描述 - 直接控制描述元素的显示 */
+.card-wrapper:hover .card-description {
+    opacity: 1;
+}
+
+.card.selected {
+    border-color: #3498db;
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    z-index: 1001;
+}
+
+/* 手牌容器样式 */
+.player-hand {
+    position: relative;
+    padding: 20px;
+    text-align: center;
+    z-index: 1;
+}
+
+#hand-status {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+#hand-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+/* 卡牌悬浮时的背景变暗效果 */
+.card-dimmer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 50; /* 远低于卡牌和描述文字的z-index，确保不影响它们的显示 */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* 查看弃牌堆详情样式 */
+.discard-icon {
+    margin-left: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+    vertical-align: middle;
+}
+
+.discard-icon:hover {
+    opacity: 1;
+}
+
+/* 玩家栏样式 */
+.players-bar {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+}
+
+.players-list {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.player-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    background: #e9ecef;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.player-item.current {
+    background: #3498db;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    transform: scale(1.05);
+}
+
+.player-item.eliminated {
+    opacity: 0.5;
+    background: #d1d5db;
+    text-decoration: line-through;
+}
+
+.player-hearts {
+    font-size: 12px;
+    color: #e74c3c;
+}
+
+.victory-condition {
+    text-align: center;
+    font-size: 14px;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+.victory-condition span:last-child {
+    font-size: 16px;
+    margin-left: 5px;
+}
+
+/* 移交遮罩层样式：只遮罩游戏内容 */
+.pass-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.pass-content {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    z-index: 1001;
+}
+
+.pass-content h2 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 24px;
+}
+
+.pass-content p {
+    margin: 0 0 30px 0;
+    color: #555;
+    font-size: 16px;
+}
+
+.pass-button {
+    padding: 12px 30px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.pass-button:hover {
+    background: #2980b9;
+}
+
+.pass-overlay.hidden {
+    display: none;
+}
+
+#discard-pile {
+    position: relative;
+    display: inline-block;
+}
+
+.discard-details {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    margin-top: 4px;
+    white-space: nowrap;
+}
+
+.discard-details h4 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: #333;
+    text-align: center;
+    font-weight: bold;
+}
+
+.discard-details.hidden {
+    display: none;
+}
+
+.discard-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.discard-item-name {
+    color: #555;
+}
+
+.discard-item-count {
+    font-weight: 600;
+    color: #333;
+}
+
+/* 模态框样式 */
+.modal {
+    display: flex;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: center;
+}
+
+/* 胜利庆祝特效样式 */
+.celebration-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.celebration-modal {
+    background: linear-gradient(135deg, #fff, #f8f9fa);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes scaleOut {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.8); opacity: 0; }
+}
+
+.celebration-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    animation: bounce 1s ease-in-out;
+}
+
+.victory-emoji {
+    font-size: 48px;
+    margin: 20px 0;
+    animation: bounce 1s ease-in-out infinite;
+}
+
+.victory-text {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.victory-gold { color: #FFD700; }
+.victory-green { color: #4CAF50; }
+.victory-orange { color: #FF9800; }
+.victory-blue { color: #2196F3; }
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    max-width: 90%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-message {
+    padding: 20px;
+    text-align: center;
+    font-size: 18px;
+    color: #333;
+    font-weight: 500;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.close {
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close:hover {
+    color: #000;
+}
+
+.modal-body {
+    text-align: center;
+}
+
+.modal-countdown {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+    margin-top: 10px;
+}
+
+/* modal样式已合并到统一按钮样式系统中 */
+
+#guess-input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}

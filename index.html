@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情书</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>情书</h1>
+            <div id="game-status">多人卡牌游戏</div>
+        </header>
+
+        <div id="setup-screen" class="setup-screen">
+            <h2>游戏设置</h2>
+            <div class="setup-option">
+                <label for="human-player-count">人类玩家数量 (1-8):</label>
+                <select id="human-player-count" required>
+                    <option value="1">1人</option>
+                    <option value="2">2人</option>
+                    <option value="3">3人</option>
+                    <option value="4">4人</option>
+                    <option value="5">5人</option>
+                    <option value="6">6人</option>
+                    <option value="7">7人</option>
+                    <option value="8">8人</option>
+                </select>
+            </div>
+            <div class="setup-option">
+                <label for="ai-player-count">电脑玩家数量 (0-7):</label>
+                <select id="ai-player-count" required>
+                    <option value="0">0人</option>
+                    <option value="1">1人</option>
+                    <option value="2">2人</option>
+                    <option value="3">3人</option>
+                    <option value="4">4人</option>
+                    <option value="5">5人</option>
+                    <option value="6">6人</option>
+                    <option value="7">7人</option>
+                </select>
+            </div>
+            <div id="total-players-info" class="setup-info">
+                总玩家数: 1
+            </div>
+            <!-- 确保按钮ID正确且唯一 -->
+            <button id="start-game" class="btn">开始游戏</button>
+        </div>
+
+        <div id="game-screen" class="game-screen hidden">
+            <div class="players-bar">
+                <div class="players-list" id="players-list">
+                    <!-- 玩家列表将通过JavaScript动态生成 -->
+                </div>
+                <div class="victory-condition">
+                    <span>胜利条件: </span>
+                    <span id="victory-hearts">❤️❤️❤️❤️❤️</span>
+                </div>
+            </div>
+
+            <div class="game-board">
+            <div class="deck-area">
+                <div id="draw-pile">牌堆: <span id="draw-count">16</span></div>
+                <div id="discard-pile">弃牌堆: <span id="discard-count">0</span>
+                    <span id="view-discard-details" class="discard-icon" title="查看弃牌堆详情">👁️</span>
+                    <div id="discard-details" class="discard-details hidden">
+                        <h4>弃牌堆详情</h4>
+                        <div id="discard-breakdown"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="player-hand">
+                <div id="hand-status">玩家手牌</div>
+                <div id="hand-container"></div>
+            </div>
+
+            <div class="action-area">
+                <button id="play-card" disabled>出牌</button>
+                <button id="pass-player" disabled>移交玩家</button>
+            </div>
+        </div>
+
+        <div class="game-log">
+            <h3>游戏日志</h3>
+            <ul id="log-messages"></ul>
+        </div>
+
+        <!-- 添加模态框用于玩家选择和猜测 -->
+        <div id="modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modal-title">请选择</h2>
+                    <!-- 移除关闭按钮，确保玩家必须做出选择 -->
+                </div>
+                <div class="modal-body">
+                    <div id="modal-options"></div>
+                    <!-- 移除输入框功能，仅使用选项功能 -->
+                    <button id="modal-confirm" class="modal-button">确认</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移交遮罩层：仅遮罩游戏内容区域 -->
+        <div id="pass-overlay" class="pass-overlay hidden">
+            <div class="pass-content">
+                <h2>游戏暂停</h2>
+                <p id="pass-message">请将设备移交给玩家 <span id="next-player-name"></span></p>
+                <button id="pass-continue" class="pass-button">下一步</button>
+            </div>
+        </div>
+
+        <!-- 首发玩家遮罩层 -->
+        <div id="first-player-overlay" class="pass-overlay hidden">
+            <div class="pass-content">
+                <h2 id="round-info">游戏开始！</h2>
+                <p>首发玩家：<span id="first-player-name"></span></p>
+                <button id="first-player-continue" class="pass-button">开始游戏</button>
+            </div>
+        </div>
+
+        <script src="game.js"></script>
+    </div>
+</body>
+</html>
