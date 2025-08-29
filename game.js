@@ -827,17 +827,16 @@ class LoveLetterGame {
         
         const currentCardValue = currentPlayer.hand.reduce((sum, c) => sum + c.value, 0);
         const targetCardValue = targetPlayer.hand.reduce((sum, c) => sum + c.value, 0);
-        this.logMessage(`${currentPlayer.name} (${currentCardValue}) 与 ${targetPlayer.name} (${targetCardValue}) 比大小`);
         await this.delay(500);
         
         if (currentCardValue > targetCardValue) {
             targetPlayer.isAlive = false;
             this.eliminatedOrder.push(targetPlayer.name);
-            this.logMessage(`${targetPlayer.name} 点数较小，出局`);
+            this.logMessage(`${targetPlayer.name} (${targetCardValue}) 点数较小，出局`);
         } else if (currentCardValue < targetCardValue) {
             currentPlayer.isAlive = false;
             this.eliminatedOrder.push(currentPlayer.name);
-            this.logMessage(`${currentPlayer.name} 点数较小，出局`);
+            this.logMessage(`${currentPlayer.name} (${currentCardValue}) 点数较小，出局`);
         } else {
             this.logMessage(`点数相同，无人出局`);
         }
@@ -983,16 +982,15 @@ class LoveLetterGame {
         
         const currentCardValue = currentPlayer.hand.reduce((sum, c) => sum + c.value, 0);
         const targetCardValue = targetPlayer.hand.reduce((sum, c) => sum + c.value, 0);
-        this.logMessage(`${currentPlayer.name} (${currentCardValue}) 与 ${targetPlayer.name} (${targetCardValue}) 比大小`);
         
         if (currentCardValue > targetCardValue) {
             targetPlayer.isAlive = false;
             this.eliminatedOrder.push(targetPlayer.name);
-            this.logMessage(`${targetPlayer.name} 点数较小，出局`);
+            this.logMessage(`${targetPlayer.name} (${targetCardValue}) 点数较小，出局`);
         } else if (currentCardValue < targetCardValue) {
             currentPlayer.isAlive = false;
             this.eliminatedOrder.push(currentPlayer.name);
-            this.logMessage(`${currentPlayer.name} 点数较小，出局`);
+            this.logMessage(`${currentPlayer.name} (${currentCardValue}) 点数较小，出局`);
         } else {
             this.logMessage(`点数相同，无人出局`);
         }
@@ -1786,6 +1784,9 @@ class LoveLetterGame {
         
         // 确保游戏状态正确重置
         console.log(`resetRound - 重置游戏状态完成，进入第${this.roundNumber}回合`);
+        
+        // 重置淘汰记录，为下一轮做准备
+        this.eliminatedOrder = [];
         
         // 显示新一轮首发玩家遮罩
         this.showFirstPlayerOverlay();
