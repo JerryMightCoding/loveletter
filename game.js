@@ -102,6 +102,28 @@ class LoveLetterGame {
             console.error('开始按钮元素未找到');
             return;
         }
+        
+        // 添加规则按钮事件监听
+        const rulesButton = document.getElementById('show-rules');
+        if (rulesButton) {
+            rulesButton.addEventListener('click', () => this.showRulesModal());
+        }
+        
+        // 添加关闭规则按钮事件监听
+        const closeRulesButton = document.getElementById('close-rules');
+        if (closeRulesButton) {
+            closeRulesButton.addEventListener('click', () => this.hideRulesModal());
+        }
+        
+        // 添加点击模态框背景关闭功能
+        const rulesModal = document.getElementById('rules-modal');
+        if (rulesModal) {
+            rulesModal.addEventListener('click', (event) => {
+                if (event.target === rulesModal) {
+                    this.hideRulesModal();
+                }
+            });
+        }
 
         // 添加人类和AI玩家数量变化的监听
         const humanPlayerCount = document.getElementById('human-player-count');
@@ -191,6 +213,63 @@ class LoveLetterGame {
         }
     }
 
+    // 显示规则模态框
+    showRulesModal() {
+        const rulesModal = document.getElementById('rules-modal');
+        const rulesContent = document.getElementById('rules-content');
+        
+        if (rulesModal && rulesContent) {
+            // 设置规则内容
+            const rulesHTML = `
+                <div style="text-align: left; line-height: 1.6;">
+                    <h3>游戏背景</h3>
+                    <p>在《情书》游戏中，玩家们化身为追求公主芳心的贵族，通过巧妙地使用手中的卡牌，试图成为最后一个留在宫廷中的追求者，从而获得公主的青睐。</p>
+                    
+                    <h3 style="margin-top: 20px;">主要流程</h3>
+                    <ol style="padding-left: 20px;">
+                        <li>每位玩家开始时获得1张卡牌</li>
+                        <li>从牌堆抽取1张卡牌，现在你有2张卡牌</li>
+                        <li>选择并打出1张卡牌，触发卡牌效果</li>
+                        <li>回合结束，保留1张卡牌到下一回合</li>
+                        <li>当牌堆用完或只剩一名玩家时，回合结束并计算分数</li>
+                    </ol>
+                    
+                    <h3 style="margin-top: 20px;">游戏规则</h3>
+                    <ul style="padding-left: 20px;">
+                        <li>游戏目标：获得5颗爱心标记（胜利条件）</li>
+                        <li>当你被淘汰时，你将失去当前回合获得爱心标记的机会</li>
+                        <li>每轮游戏结束时，存活的玩家中手牌点数最高者获得爱心标记</li>
+                        <li>如果手牌点数相同，则平分爱心标记（向下取整）</li>
+                        <li>先获得5颗爱心标记的玩家获胜</li>
+                    </ul>
+                    
+                    <h3 style="margin-top: 20px;">卡牌效果</h3>
+                    <div style="margin-left: 20px;">
+                        <p><strong>1. 卫兵（5张）：</strong>猜测1名玩家手牌（非卫兵），若正确则对方出局</p>
+                        <p><strong>2. 牧师（2张）：</strong>查看1名玩家手牌</p>
+                        <p><strong>3. 男爵（2张）：</strong>与1名玩家比点数，较小者出局</p>
+                        <p><strong>4. 侍女（2张）：</strong>免疫其他角色效果至下次回合</p>
+                        <p><strong>5. 王子（2张）：</strong>指定1名玩家弃牌并重新抽1张（可选择自己）</p>
+                        <p><strong>6. 国王（1张）：</strong>与1名玩家交换手牌</p>
+                        <p><strong>7. 伯爵夫人（1张）：</strong>若手牌中有王子或国王，必须先弃置伯爵夫人</p>
+                        <p><strong>8. 公主（1张）：</strong>若弃置或打出公主牌，玩家立即出局</p>
+                    </div>
+                </div>
+            `;
+            
+            rulesContent.innerHTML = rulesHTML;
+            rulesModal.classList.remove('hidden');
+        }
+    }
+    
+    // 隐藏规则模态框
+    hideRulesModal() {
+        const rulesModal = document.getElementById('rules-modal');
+        if (rulesModal) {
+            rulesModal.classList.add('hidden');
+        }
+    }
+    
     setupEventListeners() {
         console.log('setupEventListeners - 绑定事件监听器');
         // 修改：移除抽牌按钮事件监听
@@ -1804,6 +1883,13 @@ class LoveLetterGame {
                 } else {
                     this.showRoundTie(topPlayers);
                 }
+                
+                // 显示获胜玩家的手牌信息
+                topPlayers.forEach(player => {
+                    const handInfo = player.hand.map(card => `${card.name}(${card.value})`).join('、');
+                    this.logMessage(`${player.name} 的手牌: ${handInfo} (总点数: ${player.handValue})`);
+                });
+                
                 this.logMessage(`牌库已空！${topPlayers.length > 1 ? '平局！' : topPlayers[0].name + ' 获得爱心标记！'}`);
                 this.resetRound();
                 return true;
