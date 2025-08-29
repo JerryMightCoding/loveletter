@@ -48,6 +48,9 @@ class LoveLetterGame {
             const newConfirm = modalConfirm.cloneNode(true);
             modalConfirm.parentNode.replaceChild(newConfirm, modalConfirm);
             
+            // 确保确认按钮可见
+            newConfirm.classList.remove('hidden');
+            
             // 设置标题
             modalTitle.textContent = title;
             
