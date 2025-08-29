@@ -459,6 +459,7 @@ class LoveLetterGame {
                 this.isReadyToPass = true;
                 this.selectedCard = null;
                 this.logMessage(`${currentPlayer.name} 出牌完成`);
+                await this.delay(300);
                 
                 // 对于人类玩家，启用移交按钮；对于AI玩家，自动移交
                 if (currentPlayer.isAI) {
@@ -541,6 +542,7 @@ class LoveLetterGame {
     
     // AI处理卡牌效果
     async handleAICardEffect(card, currentPlayer) {
+        await this.delay(300);
         switch(card.value) {
             case 1: // 卫兵
                 await this.handleAIGuardEffect(currentPlayer);
@@ -575,6 +577,8 @@ class LoveLetterGame {
         
         // AI选择目标玩家
         const targetPlayer = this.aiSelectTargetPlayer(selectablePlayers, 'guard');
+        this.logMessage(`${currentPlayer.name} 选择了目标: ${targetPlayer.name}`);
+        await this.delay(500);
         
         // AI猜测卡牌
         const guessValue = this.aiGuessCard();
@@ -588,6 +592,7 @@ class LoveLetterGame {
         } else {
             this.logMessage(`${currentPlayer.name} 猜测${targetPlayer.name}是${guessedCardName}(${guessValue})，猜错了`);
         }
+        await this.delay(500);
     }
     
     // AI选择目标玩家
@@ -715,9 +720,12 @@ class LoveLetterGame {
         
         // AI选择目标玩家
         const targetPlayer = this.aiSelectTargetPlayer(selectablePlayers, 'priest');
+        this.logMessage(`${currentPlayer.name} 选择了目标: ${targetPlayer.name}`);
+        await this.delay(500);
         
         // AI查看目标手牌（实际游戏中不会显示给人类玩家）
         this.logMessage(`${currentPlayer.name} 查看了 ${targetPlayer.name} 的手牌`);
+        await this.delay(500);
     }
     
     // AI处理男爵效果
@@ -735,10 +743,13 @@ class LoveLetterGame {
         
         // AI选择目标玩家（优先选择可能手牌较弱的）
         const targetPlayer = this.aiSelectTargetPlayer(selectablePlayers, 'baron');
+        this.logMessage(`${currentPlayer.name} 选择了目标: ${targetPlayer.name}`);
+        await this.delay(500);
         
         const currentCardValue = currentPlayer.hand.reduce((sum, c) => sum + c.value, 0);
         const targetCardValue = targetPlayer.hand.reduce((sum, c) => sum + c.value, 0);
         this.logMessage(`${currentPlayer.name} (${currentCardValue}) 与 ${targetPlayer.name} (${targetCardValue}) 比大小`);
+        await this.delay(500);
         
         if (currentCardValue > targetCardValue) {
             targetPlayer.isAlive = false;
@@ -751,6 +762,7 @@ class LoveLetterGame {
         } else {
             this.logMessage(`点数相同，无人出局`);
         }
+        await this.delay(500);
     }
     
     // AI处理王子效果
@@ -766,6 +778,8 @@ class LoveLetterGame {
         
         // AI选择目标玩家（优先选择威胁最大的或自己）
         const targetPlayer = this.aiSelectTargetPlayer(selectablePlayers, 'prince');
+        this.logMessage(`${currentPlayer.name} 选择了目标: ${targetPlayer.name}`);
+        await this.delay(500);
         
         if (targetPlayer.hand.length > 0) {
             const discardedCard = targetPlayer.hand.pop();
@@ -782,6 +796,7 @@ class LoveLetterGame {
                 }
                 this.logMessage(`${currentPlayer.name} 让 ${targetPlayer.name} 弃置了${discardedCard.name}(${discardedCard.value})并重新抽牌`);
             }
+            await this.delay(500);
         }
     }
     
@@ -800,6 +815,8 @@ class LoveLetterGame {
         
         // AI选择目标玩家（优先选择可能手牌较好的）
         const targetPlayer = this.aiSelectTargetPlayer(selectablePlayers, 'king');
+        this.logMessage(`${currentPlayer.name} 选择了目标: ${targetPlayer.name}`);
+        await this.delay(500);
         
         [currentPlayer.hand, targetPlayer.hand] = [targetPlayer.hand, currentPlayer.hand];
         this.logMessage(`${currentPlayer.name} 与 ${targetPlayer.name} 交换了手牌`);
@@ -1257,14 +1274,16 @@ class LoveLetterGame {
             }
             
             // AI选择卡牌
-            const selectedCard = this.aiChooseCard(currentPlayer);
+            const selectedCard = await this.aiChooseCard(currentPlayer);
             this.selectedCard = selectedCard;
-            
+            await this.delay(300);
+
             // 执行出牌
             await this.playCard();
             
             // 不再需要自动调用passPlayer，因为playCard方法中已经处理了移交逻辑
             // 通过updateUI确保界面正确更新
+
             this.updateUI();
         } catch (error) {
             console.error('AI出牌出错:', error);
@@ -1285,7 +1304,8 @@ class LoveLetterGame {
     }
     
     // AI选择卡牌
-    aiChooseCard(player) {
+    async aiChooseCard(player) {
+        await this.delay(400);
         try {
             // 根据NPC策略.ini中的优先级选择卡牌
             // 1. 检查是否有强制弃牌规则（伯爵夫人+王子/国王）
